@@ -1,8 +1,8 @@
-# IKFastPy - UR5 IKFast Python Package
+# IKFastPy - HDT Angler Arm IKFast Python Package
 
-<img src="images/closed-loop-grasping.gif" height=200px align="right" />
+<!-- <img src="images/closed-loop-grasping.gif" height=200px align="right" /> -->
 
-This is a lightweight Python wrapper over [OpenRave's](http://openrave.org/) generated [IKFast](http://openrave.org/docs/0.8.2/openravepy/ikfast/) C++ executables for the UR5 robot arm (e-series XML files included). IKFast <i>"analytically solves robot inverse kinematics equations and generates optimized C++ files"</i> for fast runtime speeds (more about IKFast [here](http://openrave.org/docs/0.8.2/openravepy/ikfast/)). IKFast can be used in tandem with [URScript](http://www.sysaxes.com/manuels/scriptmanual_en_3.1.pdf) `speedj` commands on UR robot arms for real-time motion planning, which was used to create the visual servoing demo shown on the right (part of an ongoing project on closed-loop grasping with deep learning). Why `speedj`? See this UR [performance analysis report](http://orbit.dtu.dk/files/105275650/ur10_performance_analysis.pdf).
+This is a lightweight Python wrapper over [OpenRave's](http://openrave.org/) generated [IKFast](http://openrave.org/docs/0.8.2/openravepy/ikfast/) C++ executables for the UR5 robot arm (e-series XML files included). IKFast <i>"analytically solves robot inverse kinematics equations and generates optimized C++ files"</i> for fast runtime speeds (more about IKFast [here](http://openrave.org/docs/0.8.2/openravepy/ikfast/)). 
 
 Note: this package can be [easily modified](#modifying-robot-kinematics-with-openrave) to support other robot arms.
 
@@ -36,30 +36,123 @@ This implementation requires the following dependencies (tested on Ubuntu 16.04.
     ```shell
     python demo.py
     ```
+1. Check the end effector pose w.r.t base_link:
 
+```shell
+Testing forward kinematics:
+
+Joint angles:
+[0, 0, 0, 0, 0, 0]
+
+End effector pose:
+[[ 1.          0.          0.          0.46004999]
+ [ 0.          1.         -0.          0.07155   ]
+ [-0.          0.          1.          0.44045001]]
+```
+```shell
+rosrun tf tf_echo /base_link /endpoint_link
+At time 1588081070.502
+- Translation: [0.460, 0.072, 0.440]
+- Rotation: in Quaternion [-0.000, 0.000, 0.000, 1.000]
+            in RPY (radian) [-0.000, 0.000, 0.000]
+            in RPY (degree) [-0.000, 0.000, 0.000]
+```
  **Important**: ensure all rotation matrices are valid before feeding into IKFast, otherwise no IK solution will be detected. R is a rotation matrix if and only if R is orthogonal, i.e. RR<sup>T</sup> = R<sup>T</sup>R = I, and det(R) = 1.
 
  **Note**: IKFast does not return solutions for singularities. In most cases, an approximate IK solution can be found for singularities by slightly perturbing the target end effector pose before re-computing IK solutions.
 
 ## Modifying Robot Kinematics with OpenRave
 
-1. Download and install [OpenRave](http://openrave.org/). See [these installation instructions](https://scaron.info/teaching/installing-openrave-on-ubuntu-16.04.html) for Ubuntu 16.04.
+1. Download and install [OpenRave](http://openrave.org/). See [these installation instructions](https://scaron.info/teaching/installing-openrave-on-ubuntu-16.04.html) for Ubuntu 16.04. (Bug:[
+TypeError: argument of type 'Poly' is not iterable #375](https://github.com/rdiankov/openrave/issues/375))
 
-1. Modify the kinematics of the arm or TCP position (link6) by changing `ur5.robot.xml` respectively. You can find a description of the OpenRave XML file format [here](http://openrave.programmingvision.com/wiki/index.php/Format:XML).
+1. Modify the kinematics of the arm or TCP position (link6) by changing `hdt_robot.urdf` respectively. You can find a description of the OpenRave XML file format [here](http://openrave.programmingvision.com/wiki/index.php/Format:XML).
+```xml
+  <!-- endpoint -->
+  <joint name="endpoint_joint" type="fixed">
+    <origin rpy="1.57079632679 -1.57079632679 0" xyz="0 0 0.1"/> <!-- end effector offset can be added here -->
+    <parent link="drive6_link"/>
+    <child link="endpoint_link"/>
+  </joint>
+  <link name="endpoint_link">
+    </link>
+```
+
+Here is the URDF kinematics chain:
+
+```shell
+$ check_urdf hdt_robot.urdf 
+robot name is: hdt_arm
+---------- Successfully Parsed XML ---------------
+root Link: base_link has 1 child(ren)
+    child(1):  pedestal_link
+        child(1):  drive1_link
+            child(1):  drive2_link
+                child(1):  humerus_link
+                    child(1):  elbow_link
+                        child(1):  drive3_link
+                            child(1):  drive4_link
+                                child(1):  wrist_link
+                                    child(1):  drive5_link
+                                        child(1):  drive6_link
+                                            child(1):  endpoint_link
+
+```
+
+You can use ROS collada_urdf to convert from URDF to COLLADA DAE:
+```shell
+rosrun collada_urdf urdf_to_collada hdt_robot.urdf hdt_robot.dae
+```
 
 1. (Optional) Debug the kinematics using OpenRave's viewer:
     ```shell
-    openrave ur5.robot.xml
+    openrave hdt_robot.dae
     ```
 
-1. (Optional) Check the links in your file:
-    ```shell
-    openrave-robot.py ur5.robot.xml --info links
-    ```
+2. (Optional) Check the links in your file:
+
+```shell
+$ openrave-robot.py hdt_robot.dae --info links
+name          index parents      
+---------------------------------
+base_link     0                  
+pedestal_link 1     base_link    
+drive1_link   2     pedestal_link
+drive2_link   3     drive1_link  
+humerus_link  4     drive2_link  
+elbow_link    5     humerus_link 
+drive3_link   6     elbow_link   
+drive4_link   7     drive3_link  
+wrist_link    8     drive4_link  
+drive5_link   9     wrist_link   
+drive6_link   10    drive5_link  
+endpoint_link 11    drive6_link  
+---------------------------------
+name          index parents      
+```
+
+```shell
+$ openrave-robot.py hdt_robot.dae --info joints
+name           joint_index dof_index parent_link   child_link    mimic
+----------------------------------------------------------------------
+drive1_joint   0           0         pedestal_link drive1_link        
+drive2_joint   1           1         drive1_link   drive2_link        
+drive3_joint   2           2         elbow_link    drive3_link        
+drive4_joint   3           3         drive3_link   drive4_link        
+drive5_joint   4           4         wrist_link    drive5_link        
+drive6_joint   5           5         drive5_link   drive6_link        
+pedestal_joint -1          -1        base_link     pedestal_link      
+humerus_joint  -1          -1        drive2_link   humerus_link       
+elbow_joint    -1          -1        humerus_link  elbow_link         
+wrist_joint    -1          -1        drive4_link   wrist_link         
+endpoint_joint -1          -1        drive6_link   endpoint_link      
+----------------------------------------------------------------------
+name           joint_index dof_index parent_link   child_link    mimic
+```
 
 1. Use OpenRave to re-generate the IKFast C++ code `ikfast61.cpp`. 
     ```shell
-    python `openrave-config --python-dir`/openravepy/_openravepy_/ikfast.py --robot=ur5.robot.xml --iktype=transform6d --baselink=0 --eelink=6 --savefile=ikfast61.cpp --maxcasedepth 1
+    python `openrave-config --python-dir`/openravepy/_openravepy_/ikfast.py --robot=hdt_robot.dae --iktype=transform6d --baselink=0 --eelink=11 --savefile=ikfast61.cpp --maxcasedepth 1
     ```
 
 ## Citation
