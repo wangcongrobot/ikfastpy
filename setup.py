@@ -5,4 +5,7 @@ from Cython.Distutils import build_ext
 setup(ext_modules=[Extension("ikfastpy", 
                             ["ikfastpy.pyx", 
                              "ikfast_wrapper.cpp"], language="c++", libraries=['lapack'])],
-      cmdclass = {'build_ext': build_ext})
+      cmdclass = {'build_ext': build_ext},
+      name='ikfastpy',
+      version='1.0.0',
+      description='hdt ik')
