@@ -184,7 +184,7 @@
   </link>
   <!-- drive 4 -->
   <joint name="drive4_joint" type="revolute">
-    <axis xyz="0 0 -1"/>
+    <axis xyz="0 0 1"/>
     <limit effort="60.0" lower="-6.28318530718" upper="6.28318530718" velocity="0.785398163397"/>
     <origin rpy="-1.57079632679 0 0" xyz="0 0.142 0"/>
     <parent link="drive3_link"/>
@@ -239,7 +239,7 @@
   </link>
   <!-- drive 5 -->
   <joint name="drive5_joint" type="revolute">
-    <axis xyz="0 0 -1"/>
+    <axis xyz="0 0 1"/>
     <limit effort="60.0" lower="-6.28318530718" upper="6.28318530718" velocity="0.785398163397"/>
     <origin rpy="3.14159265359 0 0" xyz="0 0 -0.07155"/>
     <parent link="wrist_link"/>
@@ -268,7 +268,7 @@
   </link>
   <!-- drive 6 -->
   <joint name="drive6_joint" type="revolute">
-    <axis xyz="0 0 -1"/>
+    <axis xyz="0 0 1"/>
     <limit effort="60.0" lower="-6.28318530718" upper="6.28318530718" velocity="0.785398163397"/>
     <origin rpy="0 1.57079632679 0" xyz="0.0885 0 0"/>
     <parent link="drive5_link"/>
@@ -277,7 +277,7 @@
   </joint>
   <link name="drive6_link">
     <collision>
-      <origin rpy="3.141592653 1.57079632679 -1.57079632679" xyz="0 0 0"/>
+      <origin rpy="0 1.57079632679 -1.57079632679" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://hdt_angler_description/meshes/H024842 - A35 M-2 PINCER ASSY - SHAREABLE, UNDERWATER.STL"/>
       </geometry>

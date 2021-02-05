@@ -28,7 +28,7 @@ This implementation requires the following dependencies (tested on Ubuntu 16.04.
 
 1. Checkout this repository and compile the Cython wrapper:
     ```shell
-    git clone https://github.com/andyzeng/ikfastpy.git
+    git clone https://github.com/wangcongrobot/ikfastpy.git
     cd ikfastpy
     python setup.py build_ext --inplace
     ```
@@ -80,8 +80,10 @@ TypeError: argument of type 'Poly' is not iterable #375](https://github.com/rdia
 
 Here is the URDF kinematics chain:
 
-```shell
-$ check_urdf hdt_robot.urdf 
+```bash
+$ check_urdf hdt_robot.urdf
+```
+```bash
 robot name is: hdt_arm
 ---------- Successfully Parsed XML ---------------
 root Link: base_link has 1 child(ren)

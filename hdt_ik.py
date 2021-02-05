@@ -8,9 +8,10 @@ t1 = datetime.datetime.now()
 ur5_kin = ikfastpy.PyKinematics()
 n_joints = ur5_kin.getDOF()
 
-joint_angles = [-3.1,-1.6,1.6,-1.6,-1.6,0.] # in radians
-joint_angles = [0,0,0,0,0,0] # in radians
-joint_angles = [0.0016144849504478032, 0.02851116174066437, 0.013754926474105922, -0.012710444727898285, 0.003797917117521088, -0.00937656560536304] # in radians
+# joint_angles = [-3.1,-1.6,1.6,-1.6,-1.6,0.] # in radians
+joint_angles = [0.0,0.3,0.15,0.0,0.4,0.0] # in radians
+# joint_angles = [0.0016144849504478032, 0.02851116174066437, 0.013754926474105922, -0.012710444727898285, 0.003797917117521088, -0.00937656560536304] # in radians
+# joint_angles = [0.,0.,0.,0.,0.,0.] # in radians
 
 def select(q_sols, q_d, w=[1]*6):
     """
